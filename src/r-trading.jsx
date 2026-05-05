@@ -1551,10 +1551,10 @@ const STYLES = `
 }
 .tour-welcome-greeting .greeting-part {
   display: inline-block;
-  /* Smaller hero scale on these tiny tracking-spaced labels so they
-     can't push into each other during the staged reveal */
-  --pop-scale: 1.15;
-  --pop-y: 12px;
+  /* No hero scaling on these tiny tracking-spaced labels — fade only —
+     so they can never push past the welcome card edge during reveal. */
+  --pop-scale: 1.0;
+  --pop-y: 10px;
   transform-origin: left center;
 }
 @keyframes brcDotPulse {
@@ -3002,7 +3002,9 @@ const STYLES = `
 .flow-caption .flow-arrow { color: #6FB7DA; }
 
 
-/* ===== ORDER PANEL (advanced order types) ===== */
+/* ===== ORDER PANEL (advanced order types) =====
+   Translucent so the underlying chart/indicators stay visible behind the
+   form — the AI brought up the panel, didn't replace the screen. */
 .order-panel {
   position: absolute;
   top: 0;
@@ -3010,11 +3012,13 @@ const STYLES = `
   transform: translateX(-50%);
   width: min(420px, calc(100% - 24px));
   z-index: 12;
-  background: linear-gradient(168deg, #0E1B2C 0%, #143A5C 100%);
+  background: linear-gradient(168deg, rgba(14, 27, 44, 0.74) 0%, rgba(20, 58, 92, 0.74) 100%);
   color: #ffffff;
-  border: 1px solid rgba(111, 183, 218, 0.22);
+  border: 1px solid rgba(111, 183, 218, 0.36);
   border-radius: 18px;
   padding: 18px 18px 14px;
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 24px 56px -16px rgba(0, 0, 0, 0.7);
   font-family: 'Manrope', sans-serif;
   animation: orderSlideIn 0.45s cubic-bezier(0.4, 0, 0.4, 1) both;
@@ -3350,6 +3354,27 @@ const STYLES = `
   height: 100%;
   color: #6FB7DA;
 }
+/* Traveling light pulses along the synapses — short bright dashes
+   walk from input layer through to the output layer */
+.nn-pulse {
+  stroke: #8FD0F0;
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 2.5px rgba(143, 208, 240, 0.85));
+  /* Each line totals ~24px on the viewBox; a 5-unit dash with a 70-unit
+     gap looks like a single bright pulse traveling along the line. */
+  stroke-dasharray: 5 80;
+  stroke-dashoffset: 80;
+  animation: nnPulseTravel 2.6s linear infinite;
+}
+@keyframes nnPulseTravel {
+  0%   { stroke-dashoffset: 80; opacity: 0; }
+  6%   { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { stroke-dashoffset: -5; opacity: 0; }
+}
+
 .nn-node {
   animation: nnIdle 4.5s ease-in-out infinite;
 }
@@ -3539,6 +3564,10 @@ const STYLES = `
 }
 .post-tour-caption {
   position: fixed;
+  /* Pinned to the lower-left empty area so it never jumps */
+  bottom: 24px;
+  left: 24px;
+  width: 360px;
   z-index: 42;
   background: linear-gradient(168deg, rgba(14, 27, 44, 0.62) 0%, rgba(20, 58, 92, 0.62) 100%);
   border: 1px solid rgba(111, 183, 218, 0.36);
@@ -3841,18 +3870,21 @@ const STYLES = `
   45%           { transform: translate(0, 0); }
 }
 .phone-tap-popup {
-  background: #ffffff;
-  color: #0A2D52;
+  background: linear-gradient(168deg, rgba(14, 27, 44, 0.94) 0%, rgba(20, 58, 92, 0.94) 100%);
+  color: #ffffff;
   font-family: 'Manrope', sans-serif;
   font-size: 11px;
   font-weight: 600;
+  border: 1px solid rgba(111, 183, 218, 0.32);
   border-radius: 10px;
   padding: 7px 12px;
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
   display: inline-flex;
   flex-direction: column;
   gap: 1px;
   white-space: nowrap;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .phone-tap-popup-eyebrow {
   font-size: 8.5px;
@@ -3999,15 +4031,20 @@ const STYLES = `
   color: #6FB7DA;
 }
 
-/* OHLC overlay drawn on the chart — softer pulse on initial appearance */
-.ohlc-overlay { animation: ohlcAppear 0.8s cubic-bezier(0.4, 0, 0.4, 1) both; }
+/* OHLC overlay drawn on the chart — slow elegant fade so the step
+   transition doesn't snap. Lines bloom from invisible to settled. */
+.ohlc-overlay {
+  animation: ohlcAppear 1.4s cubic-bezier(0.4, 0, 0.4, 1) both;
+  transition: opacity 0.8s ease;
+}
 @keyframes ohlcAppear {
   0%   { opacity: 0; }
+  35%  { opacity: 0.4; }
   100% { opacity: 1; }
 }
 
 /* Header high/low fade-out animation when AI hides them */
-.stat-fade { transition: opacity 0.5s ease, transform 0.5s ease; }
+.stat-fade { transition: opacity 0.9s ease, transform 0.9s ease, max-width 0.9s ease; }
 
 @media (max-width: 1240px) {
   .rt-stage { grid-template-columns: 1fr; gap: 24px; }
@@ -4861,7 +4898,6 @@ function PhoneScreen({ day, candles, currentPrice, prevPrice, activeIndicators, 
               'bollinger':       { label: 'Tapped Bollinger band', pos: { top: '36%', left: '32%' } },
               'ohlc-offer':      { label: 'Tapped 24h high',       pos: { top: '5%',  left: '18%' } },
               'volume':          { label: 'Tapped a volume bar',   pos: { top: '60%', left: '24%' } },
-              'order-types':     { label: 'Tapped Trade',          pos: { top: '88%', left: '38%' } },
             };
             const tap = currentStepId && tapMap[currentStepId];
             if (!tap) return null;
@@ -4977,9 +5013,26 @@ function NeuralNetPanel({ pulse }) {
         <span className="neural-meta">{pulse === 'live' ? 'firing' : 'standby'}</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="neural-svg" preserveAspectRatio="xMidYMid meet">
-        {lines.map(({ a, b, key }) => (
+        {lines.map(({ a, b, key }, idx) => (
           <line key={key} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="currentColor" strokeWidth="0.45" opacity="0.22"/>
         ))}
+        {/* Traveling-light pulses — short bright dashes that walk
+            along each connection, staggered so the network looks like
+            it's firing data forward through the layers. Subset of all
+            connections to keep it readable. */}
+        {lines.map(({ a, b, key }, idx) => {
+          if (idx % 4 !== 0) return null; // pulse only every 4th line
+          const dur = 2.2 + (idx % 5) * 0.18;
+          const delay = (idx % 7) * 0.28;
+          return (
+            <line
+              key={`p-${key}`}
+              x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+              className="nn-pulse"
+              style={{ animationDuration: `${dur}s`, animationDelay: `${delay}s` }}
+            />
+          );
+        })}
         {nodes.map((layer, li) => layer.map((n, ni) => (
           <circle
             key={`n-${li}-${ni}`}
@@ -5447,21 +5500,6 @@ function PostCockpitTour({ visible, step, onNext, onClose }) {
   }, [visible, step, cur.sel]);
   if (!visible || !pos) return null;
   const pad = 12;
-  // Caption position — sit beside the spotlight when there's room, otherwise stack above/below.
-  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
-  const captionW = 320;
-  let left, top;
-  if (cur.side === 'right' && pos.left + pos.width + 24 + captionW <= vw - 16) {
-    left = pos.left + pos.width + 24;
-    top = pos.top;
-  } else if (pos.left - captionW - 24 >= 16) {
-    left = pos.left - captionW - 24;
-    top = pos.top;
-  } else {
-    // No horizontal room — place below the spotlight, centred on it
-    left = Math.max(16, Math.min(vw - captionW - 16, pos.left + pos.width / 2 - captionW / 2));
-    top = pos.top + pos.height + 24;
-  }
   const isLast = (step % total) === total - 1;
   return (
     <>
@@ -5469,7 +5507,9 @@ function PostCockpitTour({ visible, step, onNext, onClose }) {
         className="post-tour-spotlight"
         style={{ top: pos.top - pad, left: pos.left - pad, width: pos.width + pad * 2, height: pos.height + pad * 2 }}
       />
-      <div className="post-tour-caption" style={{ top, left, width: captionW }} key={step}>
+      {/* Caption pinned to the bottom-left empty area — no jumping
+          between steps so it's easy to track. */}
+      <div className="post-tour-caption" key={step}>
         <div className="post-tour-eyebrow">
           <span className="post-tour-dot" />
           Guided overview · {(step % total) + 1} / {total}
@@ -5887,6 +5927,16 @@ const COCKPIT_SCRIPT = [
     actions: [
       { id: 'open', label: 'Open order panel', primary: true },
       { id: 'skip', label: 'Skip', skip: true },
+    ],
+  },
+  {
+    id: 'your-turn',
+    eyebrow: '07 · Your turn',
+    thought: 'Okay — let me explore for myself now.',
+    title: <>Now <span className="accent">explore the interface</span> and try it yourself.</>,
+    body: <>Click around. Switch days. Open the order panel. The AI keeps watching, but the next move is yours.</>,
+    actions: [
+      { id: 'explore', label: 'Start exploring', primary: true },
     ],
   },
 ];
@@ -6370,7 +6420,7 @@ export default function App() {
   }, [mode, cockpitStep, cockpitDone]);
   // Manual-advance only — user clicks Next on the caption pop-up.
   useEffect(() => {
-    const stepWithGuide = ['bollinger', 'volume'];
+    const stepWithGuide = ['bollinger']; // hold off on volume — too soon to push another guide
     const cur = COCKPIT_SCRIPT[cockpitStep]?.id;
     if (mode !== 'cockpit' || !stepWithGuide.includes(cur)) {
       setAiGuideStep(null);
