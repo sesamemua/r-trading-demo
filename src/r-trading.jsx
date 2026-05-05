@@ -1536,10 +1536,14 @@ const STYLES = `
   text-transform: uppercase;
   margin-bottom: 22px;
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.tour-welcome-greeting .greeting-line {
+  display: inline-flex;
   align-items: center;
-  flex-wrap: nowrap;
-  gap: 72px; /* very generous spacing — even at hero scale parts can't bump */
-  white-space: nowrap;
+  gap: 12px;
 }
 .tour-welcome-greeting .greeting-dot {
   width: 7px; height: 7px;
@@ -1551,11 +1555,14 @@ const STYLES = `
 }
 .tour-welcome-greeting .greeting-part {
   display: inline-block;
-  /* No hero scaling on these tiny tracking-spaced labels — fade only —
-     so they can never push past the welcome card edge during reveal. */
+  /* Fade only — no hero scaling on these tracking-spaced labels. */
   --pop-scale: 1.0;
   --pop-y: 10px;
   transform-origin: left center;
+}
+.tour-welcome-greeting .greeting-part-second {
+  /* Slightly muted second line so it reads as a supporting label */
+  color: rgba(111, 183, 218, 0.72);
 }
 @keyframes brcDotPulse {
   0%, 100% { box-shadow: 0 0 0 5px rgba(111, 183, 218, 0.18); }
@@ -3003,14 +3010,13 @@ const STYLES = `
 
 
 /* ===== ORDER PANEL (advanced order types) =====
-   Translucent so the underlying chart/indicators stay visible behind the
-   form — the AI brought up the panel, didn't replace the screen. */
+   Translucent + offset to the LEFT so the underlying chart stays visible
+   on the right — the AI brought up the panel, didn't replace the screen. */
 .order-panel {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(420px, calc(100% - 24px));
+  top: 16px;
+  left: 8px;
+  width: min(360px, calc(100% - 16px));
   z-index: 12;
   background: linear-gradient(168deg, rgba(14, 27, 44, 0.74) 0%, rgba(20, 58, 92, 0.74) 100%);
   color: #ffffff;
@@ -3063,8 +3069,8 @@ const STYLES = `
 .order-panel .order-btn.ghost:hover { color: #ffffff; background: rgba(0, 0, 0, 0.28); }
 .order-panel .order-foot { color: rgba(255, 255, 255, 0.45); }
 @keyframes orderSlideIn {
-  0%   { opacity: 0; transform: translate(-50%, -12px) scale(0.98); filter: blur(4px); }
-  100% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0); }
+  0%   { opacity: 0; transform: translate(-12px, -8px) scale(0.98); filter: blur(4px); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
 }
 .order-panel-head {
   display: flex;
@@ -3545,18 +3551,34 @@ const STYLES = `
 
 
 /* ===== POST-COCKPIT GUIDED TOUR =====
-   No dim, no blur — the rest of the interface stays fully visible while
-   a single panel is highlighted. Caption is translucent so the user can
-   see what's underneath the popup. Manual advance via Next button. */
+   The rest of the interface dims down; only the spotlight target and
+   the caption stay lit. Caption is fixed bottom-centre so it never
+   jumps. Manual advance via Next button. */
+.post-tour-dim {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 4, 10, 0.62);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  z-index: 40;
+  pointer-events: none;
+  animation: postTourDimIn 0.55s ease both;
+}
+@keyframes postTourDimIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
 .post-tour-spotlight {
   position: fixed;
   z-index: 41;
   pointer-events: none;
   border-radius: 16px;
   box-shadow:
+    /* huge inset mask to "cut" a window through the dim layer */
+    0 0 0 9999px rgba(2, 4, 10, 0.62),
     0 0 0 2px rgba(111, 183, 218, 0.85),
-    0 0 32px 6px rgba(111, 183, 218, 0.45),
-    0 0 72px 14px rgba(111, 183, 218, 0.18);
+    0 0 36px 8px rgba(111, 183, 218, 0.55),
+    0 0 96px 18px rgba(111, 183, 218, 0.20);
   transition: top 0.45s cubic-bezier(0.4, 0, 0.4, 1),
               left 0.45s cubic-bezier(0.4, 0, 0.4, 1),
               width 0.45s cubic-bezier(0.4, 0, 0.4, 1),
@@ -3564,10 +3586,11 @@ const STYLES = `
 }
 .post-tour-caption {
   position: fixed;
-  /* Pinned to the lower-left empty area so it never jumps */
-  bottom: 24px;
-  left: 24px;
-  width: 360px;
+  /* Fixed bottom-centre — centred in the empty space below the panels */
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 380px;
   z-index: 42;
   background: linear-gradient(168deg, rgba(14, 27, 44, 0.62) 0%, rgba(20, 58, 92, 0.62) 100%);
   border: 1px solid rgba(111, 183, 218, 0.36);
@@ -5503,12 +5526,17 @@ function PostCockpitTour({ visible, step, onNext, onClose }) {
   const isLast = (step % total) === total - 1;
   return (
     <>
+      {/* Dim the rest of the interface — only the spotlight target and
+          the caption stay lit. Spotlight has its own giant box-shadow
+          mask, but a backing dim layer fills the rest of the screen. */}
+      <div className="post-tour-dim" />
       <div
         className="post-tour-spotlight"
         style={{ top: pos.top - pad, left: pos.left - pad, width: pos.width + pad * 2, height: pos.height + pad * 2 }}
       />
-      {/* Caption pinned to the bottom-left empty area — no jumping
-          between steps so it's easy to track. */}
+      {/* Caption pinned to bottom-centre — fixed position so it never
+          jumps between steps; centred in the empty space below the
+          panels for easy reading. */}
       <div className="post-tour-caption" key={step}>
         <div className="post-tour-eyebrow">
           <span className="post-tour-dot" />
@@ -6283,9 +6311,11 @@ function Tour({ step, refs, onNext, onPrev, onSkip, onClose }) {
         <WelcomeBackdrop />
         <div className="tour-welcome-card">
           <div className="tour-welcome-greeting">
-            <span className="greeting-dot" />
-            <span className="greeting-part tour-reveal tour-reveal-1">Welcome</span>
-            <span className="greeting-part tour-reveal tour-reveal-2">UI/UX Concept Demo</span>
+            <span className="greeting-line tour-reveal tour-reveal-1">
+              <span className="greeting-dot" />
+              <span className="greeting-part">Welcome</span>
+            </span>
+            <span className="greeting-part greeting-part-second tour-reveal tour-reveal-2">UI/UX Concept Demo</span>
           </div>
           <h1 className="tour-welcome-title tour-reveal tour-reveal-3">
             A trading app that reinvents new-user onboarding <span className="accent">— and grows with you.</span>
