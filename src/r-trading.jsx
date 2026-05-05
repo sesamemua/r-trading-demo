@@ -3630,29 +3630,17 @@ const STYLES = `
    The rest of the interface dims down; only the spotlight target and
    the caption stay lit. Caption is fixed bottom-centre so it never
    jumps. Manual advance via Next button. */
-.post-tour-dim {
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 4, 10, 0.32);
-  z-index: 40;
-  pointer-events: none;
-  animation: postTourDimIn 0.55s ease both;
-}
-@keyframes postTourDimIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
-}
 .post-tour-spotlight {
   position: fixed;
   z-index: 41;
   pointer-events: none;
   border-radius: 16px;
+  /* No dim mask — just a bright outline and a soft ambient halo so the
+     interface stays fully readable while drawing attention to the panel. */
   box-shadow:
-    /* light inset to keep the dim layer non-overlapping with spotlight */
-    0 0 0 9999px rgba(2, 4, 10, 0.32),
     0 0 0 2px rgba(111, 183, 218, 0.95),
-    0 0 36px 8px rgba(111, 183, 218, 0.65),
-    0 0 96px 18px rgba(111, 183, 218, 0.28);
+    0 0 28px 6px rgba(111, 183, 218, 0.55),
+    0 0 80px 14px rgba(111, 183, 218, 0.22);
   transition: top 0.45s cubic-bezier(0.4, 0, 0.4, 1),
               left 0.45s cubic-bezier(0.4, 0, 0.4, 1),
               width 0.45s cubic-bezier(0.4, 0, 0.4, 1),
@@ -5600,10 +5588,9 @@ function PostCockpitTour({ visible, step, onNext, onClose }) {
   const isLast = (step % total) === total - 1;
   return (
     <>
-      {/* Dim the rest of the interface — only the spotlight target and
-          the caption stay lit. Spotlight has its own giant box-shadow
-          mask, but a backing dim layer fills the rest of the screen. */}
-      <div className="post-tour-dim" />
+      {/* Light spotlight only — the rest of the interface stays fully
+          legible. No dim overlay, no backdrop blur. The cyan glow
+          ring + ambient halo are enough to draw the eye. */}
       <div
         className="post-tour-spotlight"
         style={{ top: pos.top - pad, left: pos.left - pad, width: pos.width + pad * 2, height: pos.height + pad * 2 }}
@@ -6256,8 +6243,8 @@ const TOUR_STEPS = [
   },
   {
     type: 'final',
-    step: '07 · Your turn',
-    title: <>Watch a guided run of <span className="accent">how the whole loop works.</span></>,
+    step: '07 · Watch the run',
+    title: <>A guided run of <span className="accent">how the whole loop works.</span></>,
     body: <>The avatar settles into a name. The AI starts narrating in real time. The interface adapts in front of you. <strong>Day 1 → Day 30 → Day 90, in three minutes.</strong></>,
   },
 ];
