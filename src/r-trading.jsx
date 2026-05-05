@@ -1529,16 +1529,18 @@ const STYLES = `
 /* Eyebrow with pulsing cyan dot — replaces the old amber-line pulse strip */
 .tour-welcome-greeting {
   font-family: 'Manrope', sans-serif;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #6FB7DA;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   margin-bottom: 22px;
+  /* Header bar: dot+Welcome on the left, label aligned right */
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 .tour-welcome-greeting .greeting-line {
   display: inline-flex;
@@ -1561,8 +1563,10 @@ const STYLES = `
   transform-origin: left center;
 }
 .tour-welcome-greeting .greeting-part-second {
-  /* Slightly muted second line so it reads as a supporting label */
+  /* Right-aligned supporting label, slightly muted */
   color: rgba(111, 183, 218, 0.72);
+  text-align: right;
+  transform-origin: right center;
 }
 @keyframes brcDotPulse {
   0%, 100% { box-shadow: 0 0 0 5px rgba(111, 183, 218, 0.18); }
@@ -2458,6 +2462,78 @@ const STYLES = `
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
+
+/* ===== TRAIT MAP (live filling under the profile card) ===== */
+.trait-map {
+  background: linear-gradient(168deg, rgba(14, 27, 44, 0.74) 0%, rgba(20, 58, 92, 0.74) 100%);
+  border: 1px solid rgba(111, 183, 218, 0.22);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  margin-top: -10px;
+  padding: 14px 16px 14px;
+  position: relative;
+}
+.trait-map::before {
+  /* Visual seam tying the trait map to the profile card above */
+  content: '';
+  position: absolute;
+  top: -1px; left: 14px; right: 14px;
+  border-top: 1px dashed rgba(111, 183, 218, 0.22);
+}
+.trait-map-eyebrow {
+  font-family: 'Manrope', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.trait-map-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #6FB7DA;
+  box-shadow: 0 0 0 4px rgba(111, 183, 218, 0.18);
+  animation: brcDotPulse 2.4s ease-in-out infinite;
+}
+.trait-map-rows { display: flex; flex-direction: column; gap: 7px; }
+.trait-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 26px;
+  gap: 10px;
+  align-items: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+.trait-name { font-weight: 500; }
+.trait-bar {
+  position: relative;
+  height: 4px;
+  background: rgba(111, 183, 218, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.trait-fill {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  border-radius: 4px;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.4, 1);
+  filter: drop-shadow(0 0 3px currentColor);
+}
+.trait-score {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 
 /* ===== THOUGHT BUBBLE (under the profile, types out per step) ===== */
 .thought-bubble {
@@ -3557,9 +3633,7 @@ const STYLES = `
 .post-tour-dim {
   position: fixed;
   inset: 0;
-  background: rgba(2, 4, 10, 0.62);
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+  background: rgba(2, 4, 10, 0.32);
   z-index: 40;
   pointer-events: none;
   animation: postTourDimIn 0.55s ease both;
@@ -3574,11 +3648,11 @@ const STYLES = `
   pointer-events: none;
   border-radius: 16px;
   box-shadow:
-    /* huge inset mask to "cut" a window through the dim layer */
-    0 0 0 9999px rgba(2, 4, 10, 0.62),
-    0 0 0 2px rgba(111, 183, 218, 0.85),
-    0 0 36px 8px rgba(111, 183, 218, 0.55),
-    0 0 96px 18px rgba(111, 183, 218, 0.20);
+    /* light inset to keep the dim layer non-overlapping with spotlight */
+    0 0 0 9999px rgba(2, 4, 10, 0.32),
+    0 0 0 2px rgba(111, 183, 218, 0.95),
+    0 0 36px 8px rgba(111, 183, 218, 0.65),
+    0 0 96px 18px rgba(111, 183, 218, 0.28);
   transition: top 0.45s cubic-bezier(0.4, 0, 0.4, 1),
               left 0.45s cubic-bezier(0.4, 0, 0.4, 1),
               width 0.45s cubic-bezier(0.4, 0, 0.4, 1),
@@ -3586,11 +3660,11 @@ const STYLES = `
 }
 .post-tour-caption {
   position: fixed;
-  /* Fixed bottom-centre — centred in the empty space below the panels */
-  bottom: 56px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 380px;
+  /* Bottom-left — clear of the day-selector that sits centred under
+     the phone, so the maturity buttons stay readable. */
+  bottom: 32px;
+  left: 32px;
+  width: 360px;
   z-index: 42;
   background: linear-gradient(168deg, rgba(14, 27, 44, 0.62) 0%, rgba(20, 58, 92, 0.62) 100%);
   border: 1px solid rgba(111, 183, 218, 0.36);
@@ -5958,11 +6032,11 @@ const COCKPIT_SCRIPT = [
     ],
   },
   {
-    id: 'your-turn',
-    eyebrow: '07 · Your turn',
-    thought: 'Okay — let me explore for myself now.',
-    title: <>Now <span className="accent">explore the interface</span> and try it yourself.</>,
-    body: <>Click around. Switch days. Open the order panel. The AI keeps watching, but the next move is yours.</>,
+    id: 'hands-on',
+    eyebrow: '07 · Take it from here',
+    thought: 'Let me poke around for myself.',
+    title: <>Click any panel — the AI <span className="accent">keeps watching, quietly.</span></>,
+    body: <>Switch days. Open the order entry. Tap a different indicator. Each new tap fills another trait on the left, and the AI re-rates its next response.</>,
     actions: [
       { id: 'explore', label: 'Start exploring', primary: true },
     ],
@@ -5978,6 +6052,43 @@ function ThoughtBubble({ thought, stepKey }) {
       </div>
       <div className="thought-text">
         <Typewriter text={thought || ''} speed={26} />
+      </div>
+    </div>
+  );
+}
+
+// Trait map — a small box attached to the bottom of the profile card,
+// visualising the traits the AI is filling in as it watches the user.
+const TRAIT_DEFS = [
+  { id: 'patience',    name: 'Patience',         color: '#6FB7DA' },
+  { id: 'risk',        name: 'Risk discipline',  color: '#84C6A2' },
+  { id: 'conviction',  name: 'Conviction',       color: '#16A8A0' },
+  { id: 'follow',      name: 'Follow-through',   color: '#a989d6' },
+];
+function TraitMap() {
+  const [scores, setScores] = useState([0.18, 0.10, 0.05, 0.08]);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setScores(prev => prev.map(s => Math.min(0.92, s + Math.random() * 0.025)));
+    }, 950);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="trait-map">
+      <div className="trait-map-eyebrow">
+        <span className="trait-map-dot" />
+        Trait map · filling in
+      </div>
+      <div className="trait-map-rows">
+        {TRAIT_DEFS.map((t, i) => (
+          <div key={t.id} className="trait-row">
+            <span className="trait-name">{t.name}</span>
+            <div className="trait-bar">
+              <div className="trait-fill" style={{ width: `${scores[i] * 100}%`, background: t.color }} />
+            </div>
+            <span className="trait-score">{Math.round(scores[i] * 100)}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -6094,6 +6205,7 @@ function BeginnerCockpit({ stepIndex, doneIds, onAction, onStepEnter, flowPulse,
   return (
     <div className="cockpit">
       <CockpitProfile />
+      <TraitMap />
       <ThoughtBubble thought={current?.thought} stepKey={stepIndex} />
     </div>
   );
