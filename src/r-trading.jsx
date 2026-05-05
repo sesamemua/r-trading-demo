@@ -1538,7 +1538,7 @@ const STYLES = `
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  gap: 32px; /* generous spacing so the two parts can never overlap during their hero scale-up */
+  gap: 72px; /* very generous spacing — even at hero scale parts can't bump */
   white-space: nowrap;
 }
 .tour-welcome-greeting .greeting-dot {
@@ -1551,8 +1551,10 @@ const STYLES = `
 }
 .tour-welcome-greeting .greeting-part {
   display: inline-block;
-  /* Reduced pop scale to prevent overlap during the staged reveal */
-  --pop-scale: 1.4;
+  /* Smaller hero scale on these tiny tracking-spaced labels so they
+     can't push into each other during the staged reveal */
+  --pop-scale: 1.15;
+  --pop-y: 12px;
   transform-origin: left center;
 }
 @keyframes brcDotPulse {
@@ -3619,87 +3621,52 @@ const STYLES = `
 }
 
 
-/* ===== CROSS-PANEL SHOCKWAVE ===== sw-emit rings explode outward from
-   a panel centre; sw-shield is a translucent space-warping orb that
-   lingers; sw-beam is the blue light bridge that rips between two
-   panels. */
-.rt-shockwave {
+/* ===== CROSS-PANEL SONAR WAVE — subtle, slow, sequential ===== */
+.rt-wave {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 30;
 }
-.sw-emit {
+.sonar {
   position: absolute;
   top: 46%;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  border: 2px solid rgba(111, 183, 218, 0.95);
-  background: radial-gradient(circle, rgba(111, 183, 218, 0.45) 0%, transparent 60%);
-  transform: translate(-50%, -50%) scale(0);
+  width: 120px; height: 120px;
+  transform: translate(-50%, -50%);
+  display: block;
+  pointer-events: none;
   opacity: 0;
-  filter: drop-shadow(0 0 18px rgba(111, 183, 218, 0.6));
+  animation: sonarFade 4.2s linear 1 both;
 }
-.sw-emit-1 { left: 16%; animation: swEmit 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.0s 1 both; }
-.sw-emit-2 { left: 50%; animation: swEmit 1.5s cubic-bezier(0.16, 1, 0.3, 1) 1.1s 1 both; }
-.sw-emit-3 { left: 84%; animation: swEmit 1.5s cubic-bezier(0.16, 1, 0.3, 1) 2.2s 1 both;
-             border-color: rgba(132, 198, 162, 0.95); background: radial-gradient(circle, rgba(132,198,162,0.45) 0%, transparent 60%);
-             filter: drop-shadow(0 0 18px rgba(132, 198, 162, 0.6)); }
-@keyframes swEmit {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); border-width: 4px; }
-  20%  { opacity: 1; transform: translate(-50%, -50%) scale(0.5); border-width: 3px; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(7); border-width: 0.5px; }
+.sonar svg {
+  width: 100%; height: 100%;
+  display: block;
 }
+.sonar .sonar-arc {
+  stroke: #6FB7DA;
+  stroke-width: 1.4;
+  fill: none;
+  opacity: 0;
+  transform-origin: 0 0;
+  filter: drop-shadow(0 0 4px rgba(111, 183, 218, 0.45));
+}
+.sonar.tone-sage .sonar-arc {
+  stroke: #84C6A2;
+  filter: drop-shadow(0 0 4px rgba(132, 198, 162, 0.45));
+}
+.sonar .sonar-arc-1 { animation: sonarArc 4.0s ease-out 1 both; }
+.sonar .sonar-arc-2 { animation: sonarArc 4.0s ease-out 0.6s 1 both; }
+.sonar .sonar-arc-3 { animation: sonarArc 4.0s ease-out 1.2s 1 both; }
 
-/* Translucent warp shield — lingers as a soft glowing orb after the ring */
-.sw-shield {
-  position: absolute;
-  top: 46%;
-  width: 220px; height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(111, 183, 218, 0.20) 0%, rgba(111, 183, 218, 0.05) 50%, transparent 70%);
-  transform: translate(-50%, -50%) scale(0.4);
-  opacity: 0;
-  filter: blur(14px);
+@keyframes sonarFade {
+  0%   { opacity: 0; }
+  10%  { opacity: 0.9; }
+  100% { opacity: 0; }
 }
-.sw-shield-1 { left: 16%; animation: swShield 1.6s ease 0.05s 1 both; }
-.sw-shield-2 { left: 84%; animation: swShield 1.6s ease 2.2s 1 both;
-               background: radial-gradient(circle, rgba(132, 198, 162, 0.22) 0%, rgba(132, 198, 162, 0.06) 50%, transparent 70%); }
-@keyframes swShield {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-  30%  { opacity: 0.85; transform: translate(-50%, -50%) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.0); }
-}
-
-/* Beam — light shield bridging two panels, scaleX from 0 → full */
-.sw-beam {
-  position: absolute;
-  top: 46%;
-  height: 5px;
-  background: linear-gradient(90deg,
-    rgba(111, 183, 218, 0) 0%,
-    rgba(111, 183, 218, 0.85) 30%,
-    rgba(143, 207, 239, 0.95) 50%,
-    rgba(111, 183, 218, 0.85) 70%,
-    rgba(111, 183, 218, 0) 100%);
-  box-shadow: 0 0 14px rgba(111, 183, 218, 0.9), 0 0 32px rgba(111, 183, 218, 0.5);
-  border-radius: 999px;
-  transform-origin: left center;
-  opacity: 0;
-}
-.sw-beam-1 {
-  left: 16%; right: 50%;
-  animation: swBeam 1.1s cubic-bezier(0.4, 0, 0.4, 1) 0.5s 1 both;
-}
-.sw-beam-2 {
-  left: 50%; right: 16%;
-  animation: swBeam 1.1s cubic-bezier(0.4, 0, 0.4, 1) 1.55s 1 both;
-}
-@keyframes swBeam {
-  0%   { opacity: 0; transform: scaleX(0); }
-  20%  { opacity: 1; transform: scaleX(1); }
-  70%  { opacity: 1; transform: scaleX(1); }
-  100% { opacity: 0; transform: scaleX(1); }
+@keyframes sonarArc {
+  0%   { opacity: 0; transform: scale(0.45); stroke-width: 2; }
+  20%  { opacity: 0.55; }
+  100% { opacity: 0; transform: scale(2.6); stroke-width: 0.4; }
 }
 
 
@@ -5522,6 +5489,23 @@ function PostCockpitTour({ visible, step, onNext, onClose }) {
 }
 
 
+// Sonar burst — a row of right-curving concentric arcs )))) that pulse
+// outward from a panel centre. Slow, soft, never competing with the
+// typewriter / rating / neural-net animations.
+function SonarBurst({ position, delay = 0, tone = 'cyan' }) {
+  const left = position === 'left' ? '17%' : position === 'right' ? '83%' : '50%';
+  return (
+    <span className={`sonar tone-${tone}`} style={{ left, animationDelay: `${delay}s` }}>
+      <svg viewBox="-50 -50 100 100" preserveAspectRatio="xMidYMid meet">
+        <path className="sonar-arc sonar-arc-1" d="M 0 -34 A 34 34 0 0 1 0 34" />
+        <path className="sonar-arc sonar-arc-2" d="M 0 -24 A 24 24 0 0 1 0 24" />
+        <path className="sonar-arc sonar-arc-3" d="M 0 -16 A 16 16 0 0 1 0 16" />
+      </svg>
+    </span>
+  );
+}
+
+
 // ====== ACTION FLOW (User → App → AI neural net → App) ======
 // A horizontal strip showing the round-trip of every cockpit action:
 // the user avatar, the app, a mock-up neural network firing, and the
@@ -6619,18 +6603,14 @@ export default function App() {
         onClose={() => { setPostTourActive(false); }}
       />
 
-      {/* Shockwave energy — three concentric rings expand from each panel
-          centre in sequence, with two beams of blue light shield ripping
-          between them, tying user → phone → AI → user together. */}
+      {/* Sonar wave — a soft set of right-curving arcs ))))) emit from
+          each panel in slow sequence. Subtle on purpose — won't compete
+          with the typewriter / rating / neural-net animations. */}
       {mode === 'cockpit' && (
-        <div className="rt-shockwave" key={flowPulse} aria-hidden="true">
-          <span className="sw-emit sw-emit-1" />
-          <span className="sw-emit sw-emit-2" />
-          <span className="sw-emit sw-emit-3" />
-          <span className="sw-shield sw-shield-1" />
-          <span className="sw-shield sw-shield-2" />
-          <span className="sw-beam sw-beam-1" />
-          <span className="sw-beam sw-beam-2" />
+        <div className="rt-wave" key={flowPulse} aria-hidden="true">
+          <SonarBurst position="left"   delay={0} />
+          <SonarBurst position="middle" delay={1.6} />
+          <SonarBurst position="right"  delay={3.2} tone="sage" />
         </div>
       )}
 
