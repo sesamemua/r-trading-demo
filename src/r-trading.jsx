@@ -4720,9 +4720,9 @@ function PhoneScreen({ day, candles, currentPrice, prevPrice, activeIndicators, 
   const orderBookSurfaced = marketEvent && isMature;
   const [ticker, setTicker] = useState('QQQ');
   const [tickerFlash, setTickerFlash] = useState(false);
-  const tickerLabel = ticker === 'RUSA' ? 'ETF · RBC' : 'ETF';
+  const tickerLabel = ticker === 'USEQ' ? 'ETF · US' : 'ETF';
   const tickerSwap = () => {
-    setTicker(t => (t === 'QQQ' ? 'RUSA' : 'QQQ'));
+    setTicker(t => (t === 'QQQ' ? 'USEQ' : 'QQQ'));
     setTickerFlash(true);
     setTimeout(() => setTickerFlash(false), 600);
     if (onTickerSwitch) onTickerSwitch();
@@ -4795,7 +4795,7 @@ function PhoneScreen({ day, candles, currentPrice, prevPrice, activeIndicators, 
             className="app-symbol"
             onClick={tickerSwap}
             style={{ cursor: 'pointer', userSelect: 'none' }}
-            title="Switch ticker (QQQ ↔ RUSA)"
+            title="Switch ticker (QQQ ↔ USEQ)"
           >
             <span className="back-arrow">←</span>
             <span
@@ -5375,7 +5375,7 @@ const BEHAVIOR_LIBRARY = {
     { id: 'b-anxious-check', icon: '08', label: 'Refresh position 6×', meta: 'anxiety · 10m', category: 'Reaction', looking: 'Position screen', doing: 'Compulsive checking', interp: { sees: 'Position screen opened 6 times in 10 minutes. Each visit under 3s.', interprets: 'Anxiety pattern, not analysis. User is monitoring P&L, not making a decision.', action: 'Soft nudge: "Your position is up 0.4%. Step away — alerts will find you." Do not force, but offer.' } },
     { id: 'b-panic-sell', icon: '09', label: 'Sell on first red candle', meta: 'reaction · 2s', category: 'Reaction', looking: 'Order screen', doing: 'Selling at -0.8%', interp: { sees: 'Sell triggered at -0.8% drawdown. 5th time this pattern fires this month.', interprets: 'Selling into noise, not into a thesis. Drawdown tolerance is below natural volatility.', action: 'Add 5-second cool-down on next sell inside 1% drawdown. Show: "your last 4 trades like this would have recovered."' } },
     { id: 'b-fomo-rebuy', icon: '10', label: 'Re-buy 0.6% higher', meta: 'reaction · 3s', category: 'Reaction', looking: 'Order screen', doing: 'Re-entering', interp: { sees: 'Re-buying same ticker 8 minutes after selling. Price is 0.6% higher.', interprets: 'Classic FOMO loop after panic exit. Compounding emotional cost.', action: 'Surface side-by-side: "Your sell at $520.10 → your buy back at $523.30." Information, not judgment.' } },
-    { id: 'b-switch-rusa', icon: '11', label: 'Toggle ticker QQQ ↔ RUSA', meta: 'window-shopping · 6s', category: 'Curiosity', looking: 'Symbol header', doing: 'Comparing tickers', interp: { sees: 'Tapped the ticker pill. Switched QQQ → RUSA → QQQ within 6s. No order action either side.', interprets: 'Window-shopping pattern, 87% confidence. User is comparing the U.S. tech ETF she\'s heard about (QQQ) against the RBC-managed equivalent (RUSA). Curiosity, not commitment.', action: 'Surface side-by-side: "QQQ vs RUSA — MER 0.20% vs 0.39%, holdings 100 vs ~150 large-caps." Offer the Beginner ETF Sandbox: paper-trade $1,000 of either for 7 days. No real money.' } },
+    { id: 'b-switch-rusa', icon: '11', label: 'Toggle ticker QQQ ↔ USEQ', meta: 'window-shopping · 6s', category: 'Curiosity', looking: 'Symbol header', doing: 'Comparing tickers', interp: { sees: 'Tapped the ticker pill. Switched QQQ → USEQ → QQQ within 6s. No order action either side.', interprets: 'Window-shopping pattern, 87% confidence. User is comparing the U.S. tech ETF she\'s heard about (QQQ) against the domestic large-cap equivalent (USEQ). Curiosity, not commitment.', action: 'Surface side-by-side: "QQQ vs USEQ — MER 0.20% vs 0.39%, holdings 100 vs ~150 large-caps." Offer the Beginner ETF Sandbox: paper-trade $1,000 of either for 7 days. No real money.' } },
   ],
 
   intermediate: [
@@ -6420,10 +6420,9 @@ function Tour({ step, refs, onNext, onPrev, onSkip, onClose }) {
             A trading app that reinvents new-user onboarding <span className="accent">— and grows with you.</span>
           </h1>
           <div className="tour-welcome-credit tour-reveal tour-reveal-4">
-            <div className="credit-name">Ruilin Yuan</div>
             <div className="credit-role">
-              <span className="credit-label">Candidacy</span>
-              <span className="credit-value">Director, Digital Design · RBC</span>
+              <span className="credit-label">Concept study</span>
+              <span className="credit-value">Adaptive onboarding for a mobile trading app</span>
             </div>
           </div>
           <p className="tour-welcome-body tour-reveal tour-reveal-5">
